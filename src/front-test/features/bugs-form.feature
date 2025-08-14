@@ -2,46 +2,47 @@
 Feature: Bugs Form - Register
 
   Background:
-    Given User is on the Bugs Form page
+    Given El usuario está en la página del formulario de Bugs
 
   # TC-01
-  Scenario: Verify last name is required
-    When User fills the form without last name
-    And User clicks Register
-    Then Last Name field should be invalid
+  Scenario: Validar que el apellido sea obligatorio
+    When El usuario completa el formulario sin apellido
+    And El usuario hace clic en Registrar
+    Then El campo Apellido debería ser inválido
 
   # TC-02
-  Scenario: Verify phone enforces minimum 10 digits and rejects non-digits
-    When User fills the form with phone "12345"
-    And User clicks Register
-    Then Phone field should be invalid
-    When User refreshes and fills the form with phone "1234567890"
-    And User clicks Register
-    Then Phone field should be valid
+  Scenario: Validar que el teléfono exige mínimo 10 dígitos y rechaza no numéricos
+    When El usuario completa el formulario con teléfono "12345"
+    And El usuario hace clic en Registrar
+    Then El campo Teléfono debería ser inválido
+    When El usuario refresca la página y completa el formulario con teléfono "1234567890"
+    And El usuario hace clic en Registrar
+    Then El campo Teléfono debería ser válido
 
   # TC-03
-  Scenario: Verify email address format validation (common invalid)
-    When User fills the form with email "plainaddress"
-    And User clicks Register
-    Then Email field should be invalid
+  Scenario: Validar formato de email (caso inválido común)
+    When El usuario completa el formulario con email "plainaddress"
+    And El usuario hace clic en Registrar
+    Then El campo Email debería ser inválido
 
   # TC-04
-  Scenario: Verify password length boundaries [6,20]
-    When User fills the form with password "abc12"
-    And User clicks Register
-    Then Password field should be invalid
-    When User refreshes and fills the form with password "abc123"
-    And User clicks Register
-    Then Password field should be valid
-    When User refreshes and fills the form with password "aaaaaaaaaaaaaaaaaaaaa"
-    And User clicks Register
-    Then Password field should be invalid
+  Scenario: Validar límites de longitud de contraseña [6,20]
+    When El usuario completa el formulario con contraseña "abc12"
+    And El usuario hace clic en Registrar
+    Then El campo Contraseña debería ser inválido
+    When El usuario refresca la página y completa el formulario con contraseña "abc123"
+    And El usuario hace clic en Registrar
+    Then El campo Contraseña debería ser válido
+    When El usuario refresca la página y completa el formulario con contraseña "aaaaaaaaaaaaaaaaaaaaa"
+    And El usuario hace clic en Registrar
+    Then El campo Contraseña debería ser inválido
 
   # TC-05
-  Scenario: Verify terms & conditions checkbox required and country selection handling
-    When User fills the form without accepting terms
-    And User clicks Register
-    Then Terms checkbox should be invalid or required
-    When User refreshes and fills the form selecting country "Argentina" and accepting terms
-    And User clicks Register
-    Then Country field should be valid
+  Scenario: Validar checkbox de Términos obligatorio y manejo de País
+    When El usuario completa el formulario sin aceptar los términos
+    And El usuario hace clic en Registrar
+    Then El checkbox de Términos debería ser obligatorio o inválido
+    When El usuario refresca la página y completa el formulario seleccionando país "Argentina" y aceptando los términos
+    And El usuario hace clic en Registrar
+    Then El campo País debería ser válido
+
