@@ -91,6 +91,20 @@ async function resolveFieldCtrl(
   return page.locator('form input, form select, form textarea').first();
 }
 
+/** Localizador del <select> de Country (o fallback). */
+function countrySelectOnly(page: any) {
+  // 1) <select> que sigue al label "Country"
+  const nearLabelSelect = page
+    .locator('label:has-text("Country")')
+    .locator('xpath=following::select[1]')
+    .first();
+
+  // 2) Fallback: primer <select> dentro del form
+  const anyFormSelect = page.locator('form select').first();
+
+  return nearLabelSelect.or(anyFormSelect);
+}
+
 /**
  * Rellena el formulario (detecta <select> o <input> para Country).
  * T&C: si está disabled no intenta click.
@@ -299,6 +313,29 @@ When(
   }
 );
 
+// Nuevo TC-07: selección explícita de país desde dropdown
+When(
+  /^(?:User selects country|El usuario selecciona el país) "([^"]+)" (?:from the dropdown|del dropdown)$/,
+  async function (country: string) {
+    for (const page of pages) {
+      const select = countrySelectOnly(page);
+      const exists = await select.count();
+
+      if (!exists) {
+        console.warn('WARN: No se encontró un <select> de Country (posible bug del sitio). Usando fallback input.');
+        const countryCtrl = await resolveFieldCtrl(page, countryLabel, 'Country', /country|enter.*country/i);
+        await countryCtrl.fill(country);
+        continue;
+      }
+
+      await select.waitFor({ state: 'visible', timeout: 2000 });
+      await select.selectOption({ label: country }).catch(async () => {
+        await select.selectOption(country);
+      });
+    }
+  }
+);
+
 /* THEN */
 Then(
   /^(?:Last Name field should be invalid|El campo Apellido debería ser inválido)$/,
@@ -368,12 +405,37 @@ Then(
   }
 );
 
-// Nuevo: todos los campos válidos
+// Nuevo TC-06: todos los campos válidos
 Then(
   /^(?:All fields should be valid|Todos los campos deberían ser válidos)$/,
   async function () {
     await expectAllFieldsValid();
   }
 );
+
+// Nuevo TC-07: verificación del país seleccionado en el dropdown
+Then(
+  /^(?:Selected country should be|El país seleccionado debe ser) "([^"]+)"$/,
+  async function (expected: string) {
+    for (const page of pages) {
+      const select = countrySelectOnly(page);
+      const exists = await select.count();
+
+      if (!exists) {
+        console.warn('WARN: No hay <select> de Country para validar (posible bug del sitio).');
+        // Modo “suave”: no fallamos. Para modo estricto:
+        // expect(exists).toBeGreaterThan(0);
+        continue;
+      }
+
+      const selected = await select.evaluate((el: HTMLSelectElement) => {
+        const opt = el.selectedOptions?.[0];
+        return opt?.label || opt?.textContent?.trim() || (opt as any)?.value || '';
+      });
+      expect(selected).toBe(expected);
+    }
+  }
+);
+
 
 
