@@ -45,4 +45,10 @@ Feature: Bugs Form - Register
     When El usuario refresca la página y completa el formulario seleccionando país "Argentina" y aceptando los términos
     And El usuario hace clic en Registrar
     Then El campo País debería ser válido
+    
+  # TC-06
+  Scenario: Envío del formulario con datos válidos
+    When El usuario completa el formulario con datos válidos
+    And El usuario hace clic en Registrar
+    Then Todos los campos deberían ser válidos
 

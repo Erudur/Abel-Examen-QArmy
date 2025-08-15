@@ -33,7 +33,7 @@ const defaultData: Required<FormData> = {
   country: 'Argentina',
   email: 'abel.diaz@example.com',
   password: 'abc123',
-  // el checkbox de T&C está deshabilitado en el sitio, no lo marcamos por defecto
+  // checkbox T&C está deshabilitado en el sitio, no lo marcamos por defecto
   acceptTerms: false,
 };
 
@@ -187,6 +187,16 @@ async function expectValidityByLabelOrVisual(
   }
 }
 
+/** Valida que TODOS los campos queden válidos. */
+async function expectAllFieldsValid() {
+  await expectValidityByLabelOrVisual(firstNameLabel, 'First Name', /enter.*first/i, true, 'First Name');
+  await expectValidityByLabelOrVisual(lastNameLabel,  'Last Name',  /enter.*last/i,  true, 'Last Name');
+  await expectValidityByLabelOrVisual(phoneLabel,     'Phone',      /enter.*(phone|nunber|number)/i, true, 'Phone');
+  await expectValidityByLabelOrVisual(emailLabel,     'Email address', /enter.*email/i, true, 'Email');
+  await expectValidityByLabelOrVisual(passwordLabel,  'Password',   /enter.*password/i, true, 'Password');
+  await expectValidityByLabelOrVisual(countryLabel,   'Country',    /country|enter.*country/i, true, 'Country');
+}
+
 /** Verificación de T&C “smoke”: si está disabled, pasa con warning; si no, esperamos required=true. */
 async function expectCheckboxRequired(label: RegExp) {
   for (const page of pages) {
@@ -204,7 +214,7 @@ async function expectCheckboxRequired(label: RegExp) {
   }
 }
 
-/* --------------------------------- Step Definitions (ES/EN) -------------------------------------- */
+/* ------------------------------ Step Definitions (ES / EN) ------------------------------ */
 
 /* GIVEN */
 Given(
@@ -281,6 +291,14 @@ When(
   }
 );
 
+// Nuevo: llenar todo con datos válidos (happy path)
+When(
+  /^(?:User fills the form with valid data|El usuario completa el formulario con datos válidos)$/,
+  async function () {
+    await fillFormAll({ acceptTerms: true });
+  }
+);
+
 /* THEN */
 Then(
   /^(?:Last Name field should be invalid|El campo Apellido debería ser inválido)$/,
@@ -349,4 +367,13 @@ Then(
     await expectValidityByLabelOrVisual(countryLabel, 'Country', /country|enter.*country/i, true, 'Country');
   }
 );
+
+// Nuevo: todos los campos válidos
+Then(
+  /^(?:All fields should be valid|Todos los campos deberían ser válidos)$/,
+  async function () {
+    await expectAllFieldsValid();
+  }
+);
+
 
